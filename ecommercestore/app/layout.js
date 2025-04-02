@@ -1,9 +1,15 @@
-import { SessionProvider } from "next-auth/react"
+"use client";  // Mark this as a Client Component
 
-export default function App({  Component, pageProps: { session, ...pageProps }}) {
+import { SessionProvider } from "next-auth/react";
+
+export default function Layout({ children }) {
   return (
-    <SessionProvider session={session}>
-      <Component {...pageProps}/>
-    </SessionProvider>
-  )
+    <html lang="en">
+      <body>
+        <SessionProvider>
+          {children}
+        </SessionProvider>
+      </body>
+    </html>
+  );
 }
