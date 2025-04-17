@@ -1,5 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import clientPromise from "@/lib/db"; // ✅ Fixed import for MongoDB connection
 
 export const authOptions = {
   providers: [
@@ -8,12 +10,29 @@ export const authOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
+  adapter: MongoDBAdapter(clientPromise), // ✅ Store users in MongoDB
   pages: {
-    signIn: "/auth/signin", // Optional: Custom sign-in page
+    signIn: "/auth/signin",
   },
   debug: process.env.NODE_ENV === "development",
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    async session({ session, token }) {
+      if (token?.sub) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+      }
+      return token;
+    },
+  },
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };

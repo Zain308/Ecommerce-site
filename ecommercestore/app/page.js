@@ -25,7 +25,7 @@ export default function Home() {
   }
 
   return (
-    <div>
+    <div className="bg-blue-900 min-h-screen">
       <h1>Welcome, {session.user?.email}!</h1>
       <button onClick={() => signOut()}>Logout</button>
     </div>
