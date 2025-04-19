@@ -17,19 +17,27 @@ export default async function handler(req, res) {
           return res.json(products);
         }
 
-      case 'POST': {
-        const { title, description, price, images } = req.body;
-        if (!title || price === undefined) {
-          return res.status(400).json({ error: 'Title and price are required' });
+        case 'POST': {
+          const { title, description, price, images = [] } = req.body; // Default images to []
+          if (!title || price === undefined || isNaN(price)) {
+            return res.status(400).json({ error: 'Valid title and price are required' });
+          }
+          try {
+            const productDoc = await Product.create({
+              title,
+              description: description || '',
+              price: Number(price),
+              images
+            });
+            return res.status(201).json(productDoc);
+          } catch (err) {
+            console.error('Create error:', err);
+            return res.status(500).json({ 
+              error: 'Create failed',
+              details: err.message 
+            });
+          }
         }
-        const productDoc = await Product.create({
-          title,
-          description: description || '',
-          price: Number(price),
-          images,
-        });
-        return res.status(201).json(productDoc);
-      }
 
       case 'PUT': {
         const { images: productImages, _id, ...updateData } = req.body;

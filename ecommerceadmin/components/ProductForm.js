@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import Spinner from '../components/Spinner';
@@ -12,6 +12,7 @@ export default function ProductForm({
 }) {
   const [title, setTitle] = useState(existingTitle || '');
   const [description, setDescription] = useState(existingDescription || '');
+  const [category,setCategory]=useState('');
   const [price, setPrice] = useState(existingPrice || '');
   const [images, setImages] = useState(existingImages);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,6 +20,13 @@ export default function ProductForm({
   const [uploadError, setUploadError] = useState('');
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
+  const [categories,setCategories]=useState([]);
+
+  useEffect(()=>{
+    axios.get('/api/categories').then(result =>{
+      setCategories(result.data);
+    });
+  },[]);
 
   async function saveProduct(ev) {
     ev.preventDefault();
@@ -96,6 +104,19 @@ export default function ProductForm({
         onChange={ev => setTitle(ev.target.value)}
         required
       />
+      <label className="text-blue-900">Category</label>
+<select 
+  value={category} 
+  onChange={ev => setCategory(ev.target.value)}
+  className="mb-2 block w-full border-2 border-gray-300 rounded px-1 focus:border-blue-500 outline-none"
+>
+  <option value="">Uncategorized</option>
+  {categories.length > 0 && categories.map(c => (
+    <option key={c._id} value={c._id}>
+      {c.name}
+    </option>
+  ))}
+</select>
 
       <label className="text-blue-900">Photos</label>
       <div className="mb-2 flex flex-wrap gap-2">
