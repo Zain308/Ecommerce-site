@@ -1,9 +1,14 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import { Category } from "@/models/Category";
+import { getServerSession } from "next-auth";
+import { authOptions } from "./auth/[...nextauth]";
 
 export default async function handle(req, res) {
   const { method } = req;
   await mongooseConnect();
+  const session=await getServerSession(req,res,authOptions);
+  console.log(session);
+
 
   try {
     if (method === 'GET') {
@@ -12,19 +17,20 @@ export default async function handle(req, res) {
     }
 
     if (method === 'POST') {
-      const { name, parentCategory } = req.body;
+      const { name, parentCategory,properties } = req.body;
       if (!name) {
         return res.status(400).json({ error: 'Category name is required' });
       }
       const categoryDoc = await Category.create({
         name,
         parent: parentCategory || null,
+        properties,
       });
       res.json(categoryDoc);
     }
 
     if (method === 'PUT') {
-      const { _id, name, parentCategory } = req.body;
+      const { _id, name, parentCategory,properties } = req.body;
       
       if (!_id || !name) {
         return res.status(400).json({ error: 'Missing required fields' });
@@ -33,6 +39,7 @@ export default async function handle(req, res) {
       const updateData = {
         name,
         parent: parentCategory || null,
+        properties,
       };
 
       const updatedCategory = await Category.findByIdAndUpdate(

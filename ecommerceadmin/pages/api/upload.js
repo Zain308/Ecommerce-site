@@ -2,10 +2,14 @@ import multiparty from 'multiparty';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import mime from 'mime-types';
 import fs from 'fs';
+import { mongooseConnect } from '@/lib/mongoose';
 
 const BucketName = 'zain-next-ecommorce';
 
 export default async function handle(req, res) {
+  await mongooseConnect();
+    isAdminRequest(req,res);
+  
   try {
     const form = new multiparty.Form();
     const { fields, files } = await new Promise((resolve, reject) => {
